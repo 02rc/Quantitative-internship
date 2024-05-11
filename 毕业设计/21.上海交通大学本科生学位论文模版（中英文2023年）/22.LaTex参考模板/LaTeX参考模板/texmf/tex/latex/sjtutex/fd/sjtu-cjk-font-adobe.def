@@ -1,9 +1,0 @@
-\GetIdInfo $Id: sjtutex.dtx 2.0.3 2023-09-25 19:50:00Z Alexara Wu <alexarawu@outlook.com> $
-  {Adobe CJK fonts definition (SJTUTeX)}
-\ProvidesExplFile{sjtu-cjk-font-adobe.def}
-  {\ExplFileDate}{\ExplFileVersion}{\ExplFileDescription}
-\tl_if_eq:NNTF \g__sjtu_lang_tl \c__sjtu_lang_ja_tl
-  { \ctex_file_input:n { sjtu-cjk-font-adobe-ja.def } }
-  { \ctex_file_input:n { sjtu-cjk-font-adobe-zh.def } }
-\endinput
-
