@@ -13,6 +13,23 @@ import statsmodels.api as sm
 from scipy import stats
 from scipy.stats import poisson
 import os
+
+'''
+名称: foc_Comb_RC,DW_Comb_RC,rho_Comb_RC,LBQ_Comb_RC,highStdRtn_mean_RC,VaR_RC,flashCrashProb_RC,final_factor_RC
+来源: 20230629-兴业证券-高频研究系列六：时序信息中的Alpha
+作者: RC
+构造方法:
+1. 自相关系数因子：rtn_foc 分钟收益率一阶自相关系数；vol_foc 分钟成交量占比一阶自相关系数；过去15 日指标的均值作为最终的因子值；foc_Comb 等权合成 rtn_foc 和 vol_foc 因子
+2. D-W 统计量因子：rtn_DW 分钟收益率 D-W 统计量；vol_DW 分钟成交量占比 D-W 统计量；过去15 日指标的均值作为最终的因子值；DW_Comb 等权合成 rtn_DW 和 vol_DW 因子
+3. 残差自相关系数因子： rtn_rho 分钟收益率残差自相关系数；vol_rho 分钟成交量残差自相关系数；取 15 日指标的标准差作为最终因子值；rho_Comb 等权合成 rtn_rho 和 vol_rho 因子
+4. 非同步交易性因子：对于同一天而言，根据分钟收益率和分钟成交量占比计算不同回望区间下的 Q 统计量序列，计算其每日标准差并取时序上 15 日均值tn_LBQ 与 vol_LBQ等权合成 LBQ_Comb
+5. 高波收益率均值因子：计算各个分钟节点过去 30分钟的 5 分钟滚动收益率标准差，并筛选出标准差处于日内该股 80%分位数以上的时间节点，并统计该时间节点中 5 分钟滚动收益率的均值，最终构建因子highStdRtn_mean。
+6. 股价自相关性的风险度量因子：我们将假设价格序列存在自相关性，即股
+价波动并不随机的情况下，通过 正态分布刻画日内的个股 VaR ，15 日标准差作为
+最终因子，叫做 rtn_condVaR7
+4“崩盘”概率因子数首先基于前一个交易日的分钟级收益率序列，计算得到的连续上涨/下跌次数的样本数据，并进一步计算得到对于连续下跌泊松分布中参数𝜆的估计；计算个股连续下跌和连续上涨的差异：𝑥为全市场当日连续上涨𝜆𝑡𝑝𝑜𝑠中位数，𝑥 + 𝑘为当日连续下跌𝜆𝑡𝑛𝑒𝑔前25%分位数；最终引入泊松分布的累计分布函数，计算得到“崩盘”概率。计算个股过去 15 日“崩盘”概率的标准差，记为 flashCrashProb 因子。08
+5等权合成上述七个因子，记为时序信息复合因子。相乘
+'''
 def get_data(para):
     name,fre = para
     data =  pd.DataFrame()
