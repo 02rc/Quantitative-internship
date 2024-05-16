@@ -1,0 +1,6 @@
+cd C:\学校\quantifier
+git clone https://github.com/username/repository.git
+git remote add "quantifier" "git@github.com:02rc/Quantitative-internship.git"
+git checkout -b home_quantifier
+git commit -m "3.27"
+git pull quantifier main
