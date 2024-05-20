@@ -9,6 +9,7 @@ import datetime
 from multiprocessing import Pool
 from tqdm import tqdm
 import extend
+import os
 
 '''
 名称: extreme_nervous_RC
@@ -96,17 +97,65 @@ def get_extreme_nervous(start,end,n = 20):
 
     return extreme_nervous
 
+def check(new_f, org_f):
+    new_f = new_f.round(6)
+    org_f = org_f.round(6)
+    syms_set = sorted(list((set(new_f.index) & set(org_f.index))))
+    dates_set = sorted(list((set(new_f.columns) & set(org_f.columns))))
+    ident = new_f.loc[syms_set,dates_set].equals(org_f.loc[syms_set,dates_set])
+    if ident:
+        return True
+    else:
+        print(new_f.loc[syms_set,dates_set].compare(org_f.loc[syms_set,dates_set]))
+        return False
 
+
+def version_reserve(new_f,f_name):
+    if os.path.exists(f_name + '_version_reserver'):
+        pass
+    else:
+        os.makedirs(f_name + '_version_reserver')
+    
+    folder_path = f_name + '_version_reserver'
+
+    # 获取文件夹中所有文件的路径和修改时间
+    files = [(join(folder_path, file), getmtime(join(folder_path, file)))
+             for file in os.listdir(folder_path)
+             if os.path.isfile(join(folder_path, file))]
+
+    # 检查文件数量，如果超过 5 个，则删除最旧的文件
+    if len(files) > 5:
+        os.remove(files[0][0])  # 删除最旧的文件
+        print(f"已删除文件：{files[0][0]}")
+    td = str(datetime.datetime.today())[:10].replace('-','')
+    
+    new_f.to_hdf(f'{f_name}_version_reserver/{f_name}_{td}' + '.h5', key='data')
+    print(f"已保存文件：{f_name}_{td}")
+    
 def main():
     n = 20
     date_lst = ff.read('close').columns
     end = date_lst[-1]
-    start = date_lst[0] 
+    update_win = 20
+    start = date_lst[-(n+update_win+10)] 
+    
     extreme_nervous_RC = get_extreme_nervous(start,end,n)
     mv = ff.read('total_mv')
     mv_match = mv.reindex(index = extreme_nervous_RC.index,columns = extreme_nervous_RC.columns)
     extreme_nervous_RC_neu = extend.spread_reg(extreme_nervous_RC,mv_match, ind=True) # ind=True为同时进行市值与行业中性化
     ff.save('extreme_nervous_RC',extreme_nervous_RC_neu.shift(1,axis=1)*ff.filter0)
+
+    # update
+    his_extreme_nervous_RC = ff.read('extreme_nervous_RC').to_dict()
+    new_extreme_nervous_RC = (extreme_nervous_RC_neu.shift(1,axis = 1) * ff.filter0).iloc[:,-update_win:].to_dict()
+    his_extreme_nervous_RC.update(new_extreme_nervous_RC)
+    his_extreme_nervous_RC = pd.DataFrame(his_extreme_nervous_RC)
+
+    # check
+    assert check(ff.read('extreme_nervous_RC'),his_extreme_nervous_RC)
+    version_reserve(his_extreme_nervous_RC,'extreme_nervous_RC') # 旧版本保留
+    ff.save('extreme_nervous_RC',his_extreme_nervous_RC)
+
     
 if __name__ == '__main__':
     main()

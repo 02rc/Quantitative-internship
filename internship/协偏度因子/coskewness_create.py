@@ -6,8 +6,9 @@ import numpy as np
 from multiprocessing import Pool
 from tqdm import tqdm
 import extend
+import os
 '''
-名称: CSK_XYY_UP_DOWN_120D
+名称: CSK_XYY_UP_DOWN_120D_RC
 来源: 20240311-东北证券-因子选股系列之八：股票收益的协偏度因子
 作者: RC
 构造方法:
@@ -90,14 +91,18 @@ def get_CSK_XYY(x_df,y_se,k,option):
     return CSK_XYY_df
     
 def main():
-    start, end = '20170104', '20230418'
+    n = 120
+    date_lst = ff.read('close').columns
+    end = date_lst[-1]
+    start = date_lst[0] 
     rets_all = ff.rets_all.loc[:,start:end]
-    zz1000 = pd.read_pickle('/mydata2/wangs/data/feature/zz1000.pk').loc[start:end,:]
-    CSK_XYY_UP_DOWN_120D = get_CSK_XYY(rets_all,zz1000['return'],120,'all')
+    rets_mean = rets_all.mean()
+    rets_mean = rets_mean.reindex(date_lst).loc[start:end]
+    CSK_XYY_UP_DOWN_120D = get_CSK_XYY(rets_all,rets_mean,n,'all')
 
-    mv = ff.read('total_mv').loc[:,CSK_XYY_UP_DOWN_120D.columns]
-    total_index = set(CSK_XYY_UP_DOWN_120D.index) & set(mv.index)
-    CSK_XYY_UP_DOWN_120D_neu = extend.spread_reg(CSK_XYY_UP_DOWN_120D.loc[total_index,:], mv.loc[total_index,:], ind=True) # ind=True为同时进行市值与行业中性化
+    mv = ff.read('total_mv').loc[:,'20200101':]
+    CSK_XYY_UP_DOWN_120D_match = CSK_XYY_UP_DOWN_120D.reindex(index= mv.index,columns = mv.columns)
+    CSK_XYY_UP_DOWN_120D_neu = extend.spread_reg(CSK_XYY_UP_DOWN_120D_match, mv, ind=True) # ind=True为同时进行市值与行业中性化
     ff.save('CSK_XYY_UP_DOWN_120D_RC',CSK_XYY_UP_DOWN_120D_neu.shift(1,axis = 1) * ff.filter0)
 if __name__ == '__main__':
     main()
