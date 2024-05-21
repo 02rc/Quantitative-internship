@@ -12,7 +12,7 @@ import extend
 import os 
 
 '''
-名称: extreme_nervous_RC
+名称: high_fre_vol_RC,high_fre_diff_vol_RC,high_fre_absdiff_vol_RC,peak_count_vol_RC      
 来源: 基础因子研究（十四）：高频因子（九），高频波动中的时间序列信息-20201012-长江证券-22页
 作者: RC
 构造方法:

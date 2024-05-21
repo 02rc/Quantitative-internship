@@ -11,7 +11,7 @@ from tqdm import tqdm
 import extend
 import os 
 '''
-名称: extreme_nervous_RC
+名称: high_fre_vol_RC,high_fre_diff_vol_RC,high_fre_absdiff_vol_RC,peak_count_vol_RC
 来源: 基础因子研究（十四）：高频因子（九），高频波动中的时间序列信息-20201012-长江证券-22页
 作者: RC
 构造方法:
@@ -145,9 +145,9 @@ def get_all_factor(date_lst,fre0,fre1,fre2,fre3,N = 20):
     _factor0_lst,_factor1_lst,_factor2_lst,_factor3_lst = zip(*res_lst)
     _factor0 = pd.concat(_factor0_lst,axis = 1).sort_index().T
     _factor1 = pd.concat(_factor1_lst,axis = 1).sort_index().T
-    _factor2 = pd.concat(_factor2_lst,axis = 1).sort_index().T
-    _factor3 = pd.concat(_factor3_lst,axis = 1).sort_index().T
-    return _factor0,_factor1,-_factor2,-_factor3
+    _factor2 = -pd.concat(_factor2_lst,axis = 1).sort_index().T
+    _factor3 = -pd.concat(_factor3_lst,axis = 1).sort_index().T
+    return _factor0,_factor1,_factor2,_factor3
 
 
 def check(new_f, org_f):
